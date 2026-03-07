@@ -46,7 +46,7 @@ export function HeroSection({
       // Jump instantly to "behind" position (no transition)
       setTransitioning(false);
       setStyle({
-        transform: 'scale(0.1)',
+        transform: 'scale(4)',
         opacity: 0,
         filter: 'blur(14px)',
       });
