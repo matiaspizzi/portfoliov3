@@ -1,22 +1,24 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { HeroSection } from './components/ui/HeroSection';
 import { FloatingMenu } from './components/ui/FloatingMenu';
 import { WarpBackground } from './components/3d/WarpBackground';
+import { NebulaBackground } from './components/3d/NebulaBackground';
 
-const WARP_DURATION_MS = 2500;
+const WARP_DURATION_MS = 625;
 
-type AnimationPhase = 'idle' | 'warping' | 'arrived';
+type AnimationPhase = 'idle' | 'warping' | 'arrived' | 'reverse-warping';
 
 /**
  * Root application component.
- * Manages the warp animation state machine (idle → warping → arrived)
- * and renders the 3D starfield background with UI overlays.
+ * Manages the warp animation state machine:
+ *   idle → warping → arrived → reverse-warping → idle
  */
 function App(): React.JSX.Element {
   const [phase, setPhase] = useState<AnimationPhase>('idle');
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const isWarping = phase === 'warping';
+  const isWarping = phase === 'warping' || phase === 'reverse-warping';
   const hasArrived = phase === 'arrived';
 
   const startSequence = useCallback((): void => {
@@ -29,16 +31,31 @@ function App(): React.JSX.Element {
     }, WARP_DURATION_MS);
   }, [phase]);
 
+  const reverseSequence = useCallback((): void => {
+    if (phase !== 'arrived') return;
+
+    const scrolledToTop = !contentRef.current || contentRef.current.scrollTop < 10;
+    if (!scrolledToTop) return;
+
+    setPhase('reverse-warping');
+
+    setTimeout(() => {
+      setPhase('idle');
+    }, WARP_DURATION_MS);
+  }, [phase]);
+
   useEffect(() => {
     const handleWheel = (event: WheelEvent): void => {
       if (event.deltaY > 0 && phase === 'idle') {
         startSequence();
+      } else if (event.deltaY < 0 && phase === 'arrived') {
+        reverseSequence();
       }
     };
 
     window.addEventListener('wheel', handleWheel, { passive: true });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [phase, startSequence]);
+  }, [phase, startSequence, reverseSequence]);
 
   return (
     <div
@@ -70,14 +87,23 @@ function App(): React.JSX.Element {
             gl.setClearColor('#050505');
           }}
         >
-          <WarpBackground isWarping={isWarping} />
+          <NebulaBackground />
+          <WarpBackground
+            isWarping={isWarping}
+            direction={phase === 'reverse-warping' ? 'backward' : 'forward'}
+          />
         </Canvas>
       </div>
 
       {/* Hero Overlay */}
-      {!hasArrived && (
-        <HeroSection isWarping={isWarping} onStartWarp={startSequence} />
-      )}
+      <HeroSection
+        phase={
+          phase === 'warping' ? 'warp-out' :
+            phase === 'reverse-warping' ? 'warp-in' :
+              phase === 'idle' ? 'visible' : 'warp-out'
+        }
+        onStartWarp={startSequence}
+      />
 
       {/* Floating Menu */}
       <FloatingMenu isVisible={hasArrived} />
@@ -85,6 +111,7 @@ function App(): React.JSX.Element {
       {/* Content Sections */}
       {hasArrived && (
         <div
+          ref={contentRef}
           style={{
             position: 'absolute',
             inset: 0,

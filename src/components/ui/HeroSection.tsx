@@ -1,27 +1,71 @@
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+type HeroPhase = 'visible' | 'warp-out' | 'warp-in';
 
 interface HeroSectionProps {
-  readonly isWarping: boolean;
+  readonly phase: HeroPhase;
   readonly onStartWarp: () => void;
 }
 
+const PHASE_STYLES: Record<HeroPhase, React.CSSProperties> = {
+  visible: {
+    transform: 'scale(1)',
+    opacity: 1,
+    filter: 'blur(0px)',
+  },
+  'warp-out': {
+    transform: 'scale(4)',
+    opacity: 0,
+    filter: 'blur(14px)',
+  },
+  'warp-in': {
+    transform: 'scale(4)',
+    opacity: 0,
+    filter: 'blur(14px)',
+  },
+};
+
 /**
  * Full-screen overlay displaying the developer's name and title.
- * Fades out smoothly when the warp sequence begins.
+ * Uses CSS transitions for zoom effects that match star warp direction:
+ * - warp-out: zooms forward past the viewer (scale up)
+ * - warp-in: starts scaled up (behind), then zooms forward to visible
  */
 export function HeroSection({
-  isWarping,
+  phase,
   onStartWarp,
 }: HeroSectionProps): React.JSX.Element {
+  const [style, setStyle] = useState<React.CSSProperties>(PHASE_STYLES.visible);
+  const [transitioning, setTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (phase === 'warp-out') {
+      setTransitioning(true);
+      setStyle(PHASE_STYLES['warp-out']);
+    } else if (phase === 'warp-in') {
+      // Jump instantly to "behind" position (no transition)
+      setTransitioning(false);
+      setStyle({
+        transform: 'scale(0.1)',
+        opacity: 0,
+        filter: 'blur(14px)',
+      });
+
+      // Then animate forward to visible on the next frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTransitioning(true);
+          setStyle(PHASE_STYLES.visible);
+        });
+      });
+    } else {
+      setTransitioning(true);
+      setStyle(PHASE_STYLES.visible);
+    }
+  }, [phase]);
+
   return (
-    <motion.div
-      initial={{ opacity: 1, scale: 1 }}
-      animate={{
-        opacity: isWarping ? 0 : 1,
-        scale: isWarping ? 0.85 : 1,
-        y: isWarping ? -60 : 0,
-      }}
-      transition={{ duration: 1.5, ease: 'easeInOut' }}
+    <div
       style={{
         position: 'fixed',
         inset: 0,
@@ -31,6 +75,8 @@ export function HeroSection({
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
+        transition: transitioning ? 'transform 0.6s ease-out, opacity 0.6s ease-out, filter 0.6s ease-out' : 'none',
+        ...style,
       }}
     >
       <div style={{ textAlign: 'center', pointerEvents: 'auto' }}>
@@ -59,11 +105,8 @@ export function HeroSection({
           FULL STACK DEVELOPER
         </p>
 
-        {!isWarping && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
+        {phase === 'visible' && (
+          <button
             onClick={onStartWarp}
             style={{
               cursor: 'pointer',
@@ -88,9 +131,9 @@ export function HeroSection({
             }}
           >
             Initiate Sequence
-          </motion.button>
+          </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
