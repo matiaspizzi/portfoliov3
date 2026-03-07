@@ -4,8 +4,9 @@ import { HeroSection } from './components/ui/HeroSection';
 import { FloatingMenu } from './components/ui/FloatingMenu';
 import { WarpBackground } from './components/3d/WarpBackground';
 import { NebulaBackground } from './components/3d/NebulaBackground';
+import { GlobeMenu } from './components/3d/GlobeMenu';
 
-const WARP_DURATION_MS = 625;
+const WARP_DURATION_MS = 250;
 
 type AnimationPhase = 'idle' | 'warping' | 'arrived' | 'reverse-warping';
 
@@ -108,118 +109,8 @@ function App(): React.JSX.Element {
       {/* Floating Menu */}
       <FloatingMenu isVisible={hasArrived} />
 
-      {/* Content Sections */}
-      {hasArrived && (
-        <div
-          ref={contentRef}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 10,
-            overflowY: 'auto',
-          }}
-        >
-          <div style={{ paddingTop: '100vh' }}>
-            <section
-              id="about"
-              style={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1.5rem',
-                textAlign: 'center',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: '3rem',
-                  fontWeight: 'bold',
-                  color: '#facc15',
-                  marginBottom: '1.5rem',
-                }}
-              >
-                About Me
-              </h2>
-              <p
-                style={{
-                  maxWidth: '42rem',
-                  fontSize: '1.125rem',
-                  lineHeight: 1.8,
-                  color: '#f3f4f6',
-                }}
-              >
-                I am a Full Stack Developer passionate about creating innovative
-                and high-performance digital experiences. I specialize in modern
-                ecosystems like React, Next.js, Node.js, and building scalable
-                architectures.
-              </p>
-            </section>
-
-            <section
-              id="experience"
-              style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#facc15' }}>
-                Experience
-              </h2>
-            </section>
-
-            <section
-              id="projects"
-              style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#facc15' }}>
-                Projects
-              </h2>
-            </section>
-
-            <section
-              id="technologies"
-              style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderBottom: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#facc15' }}>
-                Technologies
-              </h2>
-            </section>
-
-            <section
-              id="certifications"
-              style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingBottom: '8rem',
-              }}
-            >
-              <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#facc15' }}>
-                Certifications
-              </h2>
-            </section>
-          </div>
-        </div>
-      )}
+      {/* Globe Menu */}
+      <GlobeMenu isVisible={hasArrived} />
     </div>
   );
 }

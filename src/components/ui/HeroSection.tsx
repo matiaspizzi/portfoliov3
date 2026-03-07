@@ -75,15 +75,16 @@ export function HeroSection({
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
-        transition: transitioning ? 'transform 0.6s ease-out, opacity 0.6s ease-out, filter 0.6s ease-out' : 'none',
+        transition: transitioning ? 'transform 0.25s ease-out, opacity 0.25s ease-out, filter 0.25s ease-out' : 'none',
         ...style,
       }}
     >
       <div style={{ textAlign: 'center', pointerEvents: 'auto' }}>
         <h1
           style={{
+            fontFamily: '"Adam", sans-serif',
             fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontWeight: 'bold',
+            fontWeight: 'normal',
             letterSpacing: '-0.05em',
             color: '#ffffff',
             marginBottom: '0.5rem',
@@ -105,34 +106,33 @@ export function HeroSection({
           FULL STACK DEVELOPER
         </p>
 
-        {phase === 'visible' && (
-          <button
-            onClick={onStartWarp}
-            style={{
-              cursor: 'pointer',
-              borderRadius: '9999px',
-              border: '1px solid #facc15',
-              padding: '0.75rem 2rem',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              textTransform: 'uppercase',
-              letterSpacing: '0.15em',
-              color: '#facc15',
-              background: 'transparent',
-              transition: 'all 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#facc15';
-              e.currentTarget.style.color = '#000000';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#facc15';
-            }}
-          >
-            Initiate Sequence
-          </button>
-        )}
+        <button
+          onClick={onStartWarp}
+          style={{
+            cursor: 'pointer',
+            borderRadius: '9999px',
+            border: '1px solid #facc15',
+            padding: '0.75rem 2rem',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            color: '#facc15',
+            background: 'transparent',
+            transition: 'all 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#facc15';
+            e.currentTarget.style.color = '#000000';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = '#facc15';
+          }}
+        >
+          Initiate Sequence
+        </button>
+
       </div>
     </div>
   );

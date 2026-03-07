@@ -5,13 +5,14 @@ import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 
-const PARTICLE_COUNT = 800;
-const SPREAD = 40;
+const PARTICLE_COUNT = 200;
+const SPREAD = 120;
 const DEPTH_OFFSET = -20;
 const CAMERA_PASS_THRESHOLD = 5;
 const RESET_Z = -40;
-const GLOW_TEXTURE_SIZE = 64;
-
+const GLOW_TEXTURE_SIZE = 300; // Increased size for smoother glow and extended borders
+const SPEED_MULTIPLIER_WARPING = 16.0;
+const SPEED_MULTIPLIER_IDLE = 1.0;
 const STREAK_LENGTH_WARP = 1.8;
 const STREAK_LENGTH_IDLE = 0.0;
 
@@ -42,7 +43,7 @@ function createStarfield(): Starfield {
   return { positions, speeds };
 }
 
-/** Creates a soft circular glow texture for the point sprites. */
+/** Creates a glowing 4-pointed star texture for the point sprites. */
 function createGlowTexture(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = GLOW_TEXTURE_SIZE;
@@ -52,17 +53,43 @@ function createGlowTexture(): THREE.CanvasTexture {
   if (!ctx) throw new Error('Failed to get 2D canvas context for glow texture.');
 
   const center = GLOW_TEXTURE_SIZE / 2;
-  const gradient = ctx.createRadialGradient(center, center, 0, center, center, center);
+  const pad = 24; // Large padding for light bleed
 
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.2, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.35, 'rgba(255, 255, 255, 0.9)');
-  gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
-  gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.15)');
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-  ctx.fillStyle = gradient;
+  // 1. Ambient Background Glow (Lens Flare effect)
+  const ambientGlow = ctx.createRadialGradient(center, center, 0, center, center, center);
+  ambientGlow.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+  ambientGlow.addColorStop(0.15, 'rgba(255, 255, 255, 0.3)');
+  ambientGlow.addColorStop(0.4, 'rgba(255, 255, 255, 0.05)');
+  ambientGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = ambientGlow;
   ctx.fillRect(0, 0, GLOW_TEXTURE_SIZE, GLOW_TEXTURE_SIZE);
+
+  // 2. Set up heavy core glow
+  ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+  ctx.shadowBlur = 15;
+
+  // 3. Draw 4-pointed star
+  ctx.beginPath();
+  ctx.moveTo(center, pad);
+  ctx.quadraticCurveTo(center, center, GLOW_TEXTURE_SIZE - pad, center);
+  ctx.quadraticCurveTo(center, center, center, GLOW_TEXTURE_SIZE - pad);
+  ctx.quadraticCurveTo(center, center, pad, center);
+  ctx.quadraticCurveTo(center, center, center, pad);
+  ctx.closePath();
+
+  // 4. Fill solid bright white core
+  const coreGlow = ctx.createRadialGradient(center, center, 0, center, center, center - pad);
+  coreGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  coreGlow.addColorStop(0.6, 'rgba(255, 255, 255, 0.9)');
+  coreGlow.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
+  ctx.fillStyle = coreGlow;
+  ctx.fill();
+
+  // 5. Enhance star edges slightly
+  ctx.shadowBlur = 5;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -88,12 +115,27 @@ export function WarpBackground({ isWarping, direction }: WarpBackgroundProps): R
   const lineGeometryRef = useRef<LineSegmentsGeometry | null>(null);
   const lineMaterialRef = useRef<LineMaterial | null>(null);
   const linePositionsBuffer = useRef(new Float32Array(PARTICLE_COUNT * 6));
+  const lineColorsBuffer = useRef(new Float32Array(PARTICLE_COUNT * 6));
 
   useEffect(() => {
     const group = groupRef.current;
+
+    // Initialize fading colors buffer once
+    const colors = lineColorsBuffer.current;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      // Head color (white)
+      colors[i * 6] = 1.0;
+      colors[i * 6 + 1] = 1.0;
+      colors[i * 6 + 2] = 1.0;
+      // Tail color (black, which becomes transparent with additive blending)
+      colors[i * 6 + 3] = 0.0;
+      colors[i * 6 + 4] = 0.0;
+      colors[i * 6 + 5] = 0.0;
+    }
+
     const geometry = new LineSegmentsGeometry();
     const material = new LineMaterial({
-      color: 0xffffff,
+      vertexColors: true,
       linewidth: 2,
       transparent: true,
       opacity: 0,
@@ -103,6 +145,7 @@ export function WarpBackground({ isWarping, direction }: WarpBackgroundProps): R
     });
 
     geometry.setPositions(linePositionsBuffer.current);
+    geometry.setColors(lineColorsBuffer.current);
     const segments = new LineSegments2(geometry, material);
 
     lineSegmentsRef.current = segments;
@@ -136,7 +179,7 @@ export function WarpBackground({ isWarping, direction }: WarpBackgroundProps): R
     const lineArray = linePositionsBuffer.current;
 
     const directionSign = direction === 'backward' ? -1 : 1;
-    const speedMultiplier = isWarping ? 16.0 : 0.3;
+    const speedMultiplier = isWarping ? SPEED_MULTIPLIER_WARPING : SPEED_MULTIPLIER_IDLE;
     const frameDelta = delta * 60;
 
     const targetStreak = isWarping ? STREAK_LENGTH_WARP : STREAK_LENGTH_IDLE;
@@ -177,7 +220,7 @@ export function WarpBackground({ isWarping, direction }: WarpBackgroundProps): R
     }
 
     if (pointsMaterialRef.current) {
-      const targetSize = isWarping ? 0.35 : 0.18;
+      const targetSize = isWarping ? 0.65 : 0.40;
       pointsMaterialRef.current.size +=
         (targetSize - pointsMaterialRef.current.size) * 0.05;
     }
