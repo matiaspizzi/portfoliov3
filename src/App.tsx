@@ -97,20 +97,26 @@ function App(): React.JSX.Element {
       </div>
 
       {/* Hero Overlay */}
-      <HeroSection
-        phase={
-          phase === 'warping' ? 'warp-out' :
-            phase === 'reverse-warping' ? 'warp-in' :
-              phase === 'idle' ? 'visible' : 'warp-out'
-        }
-        onStartWarp={startSequence}
-      />
-
-      {/* Floating Menu */}
-      <FloatingMenu isVisible={hasArrived} />
+      <div style={{ pointerEvents: hasArrived ? 'none' : 'auto' }}>
+        <HeroSection
+          phase={
+            phase === 'warping' ? 'warp-out' :
+              phase === 'reverse-warping' ? 'warp-in' :
+                phase === 'idle' ? 'visible' : 'warp-out'
+          }
+          onStartWarp={startSequence}
+        />
+      </div>
 
       {/* Globe Menu */}
-      <GlobeMenu isVisible={hasArrived} />
+      <div style={{ position: 'relative', zIndex: 10 }}>
+        <GlobeMenu isVisible={hasArrived} />
+      </div>
+
+      {/* Floating Menu */}
+      <div style={{ position: 'relative', zIndex: 20 }}>
+        <FloatingMenu isVisible={hasArrived} />
+      </div>
     </div>
   );
 }

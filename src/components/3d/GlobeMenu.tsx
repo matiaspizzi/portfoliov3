@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/purity */
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface GlobeMenuProps {
@@ -41,7 +42,7 @@ function GlobeSphere() {
     return new Float32Array(pts);
   }, [radius]);
 
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (groupRef.current) {
       // Slow continuous rotation
       groupRef.current.rotation.y += delta * 0.05;
@@ -98,8 +99,16 @@ export function GlobeMenu({ isVisible }: GlobeMenuProps): React.JSX.Element | nu
         animation: 'fadeIn 1s ease-out forwards',
       }}
     >
-      <div style={{ width: '100%', height: '100%', pointerEvents: 'auto', outline: 'none' }}>
+      <div style={{ width: '100%', height: '100%', pointerEvents: 'auto', outline: 'none', cursor: 'grab' }}>
         <Canvas camera={{ position: [0, 0, 8.5], fov: 60 }} gl={{ alpha: true }}>
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            enableRotate={true}
+            autoRotate={false}
+            enableDamping={true}
+            dampingFactor={0.05}
+          />
           <GlobeSphere />
         </Canvas>
       </div>
