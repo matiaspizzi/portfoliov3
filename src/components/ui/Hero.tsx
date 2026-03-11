@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 type HeroPhase = 'visible' | 'warp-out' | 'warp-in';
 
-interface HeroSectionProps {
+interface HeroProps {
   readonly phase: HeroPhase;
   readonly onStartWarp: () => void;
 }
@@ -31,10 +31,10 @@ const PHASE_STYLES: Record<HeroPhase, React.CSSProperties> = {
  * - warp-out: zooms forward past the viewer (scale up)
  * - warp-in: starts scaled up (behind), then zooms forward to visible
  */
-export function HeroSection({
+export function Hero({
   phase,
   onStartWarp,
-}: HeroSectionProps): React.JSX.Element {
+}: HeroProps): React.JSX.Element {
   const [style, setStyle] = useState<React.CSSProperties>(PHASE_STYLES.visible);
   const [transitioning, setTransitioning] = useState(false);
 
@@ -67,8 +67,9 @@ export function HeroSection({
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
+        position: 'absolute',
+        height: '100vh',
+        width: '100vw',
         zIndex: 10,
         display: 'flex',
         flexDirection: 'column',
@@ -130,7 +131,7 @@ export function HeroSection({
             e.currentTarget.style.color = '#facc15';
           }}
         >
-          Initiate Sequence
+          Continue
         </button>
 
       </div>
