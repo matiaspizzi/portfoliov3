@@ -48,13 +48,43 @@ export default function App(): React.JSX.Element {
     }
   };
 
+  const touchStartYRef = useRef<number | null>(null);
+
   useEffect(() => {
+    const SWIPE_THRESHOLD_PX = 30;
+
     const handleWheel = (event: WheelEvent) => {
       if (event.deltaY > 0 && phase === 'idle') startSequence();
       else if (event.deltaY < 0 && phase === 'arrived') reverseSequence();
     };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (touchStartYRef.current === null) return;
+      const deltaY = touchStartYRef.current - (event.changedTouches[0]?.clientY ?? 0);
+      touchStartYRef.current = null;
+
+      if (deltaY > SWIPE_THRESHOLD_PX && phase === 'idle') {
+        // Swiped up (finger moved upward) → scroll down intent → forward warp
+        startSequence();
+      } else if (deltaY < -SWIPE_THRESHOLD_PX && phase === 'arrived') {
+        // Swiped down (finger moved downward) → scroll up intent → reverse warp
+        reverseSequence();
+      }
+    };
+
     window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => window.removeEventListener('wheel', handleWheel);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
   }, [phase, startSequence, reverseSequence]);
 
   return (

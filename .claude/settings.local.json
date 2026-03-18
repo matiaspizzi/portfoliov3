@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "WebFetch(domain:www.pulsemcp.com)"
+      "WebFetch(domain:www.pulsemcp.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
