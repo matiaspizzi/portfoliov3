@@ -1,6 +1,5 @@
-/* eslint-disable react-hooks/purity */
-import { useRef, useMemo, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useRef, useMemo } from 'react';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -34,8 +33,7 @@ function CylinderShape() {
   );
 }
 
-export function CylinderMenu({ isVisible }: GlobeMenuProps): React.JSX.Element | null {
-  if (!isVisible) return null;
+export function CylinderMenu(): React.JSX.Element | null {
 
   return (
     <div

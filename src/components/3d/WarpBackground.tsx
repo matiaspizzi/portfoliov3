@@ -13,7 +13,7 @@ const RESET_Z = -40;
 const GLOW_TEXTURE_SIZE = 400; // Increased size for smoother glow and extended borders
 const SPEED_MULTIPLIER_WARPING = 16.0;
 const SPEED_MULTIPLIER_IDLE = 1.0;
-const STREAK_LENGTH_WARP = 1.8;
+const STREAK_LENGTH_WARP = 0.5;
 const STREAK_LENGTH_IDLE = 0.0;
 
 type WarpDirection = 'forward' | 'backward';
@@ -239,9 +239,7 @@ export function WarpBackground({ isWarping, direction }: WarpBackgroundProps): R
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={PARTICLE_COUNT}
-            array={starfield.positions}
-            itemSize={3}
+            args={[starfield.positions, 3]}
           />
         </bufferGeometry>
         <pointsMaterial

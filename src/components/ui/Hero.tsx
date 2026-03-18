@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { HeroTitle } from './HeroTitle';
+import { WarpButton } from './WarpButton';
 
 type HeroPhase = 'visible' | 'warp-out' | 'warp-in';
 
@@ -25,6 +27,8 @@ const PHASE_STYLES: Record<HeroPhase, React.CSSProperties> = {
   },
 };
 
+const TRANSITION_VALUE = 'transform 0.25s ease-out, opacity 0.25s ease-out, filter 0.25s ease-out';
+
 /**
  * Full-screen overlay displaying the developer's name and title.
  * Uses CSS transitions for zoom effects that match star warp direction:
@@ -35,37 +39,60 @@ export function Hero({
   phase,
   onStartWarp,
 }: HeroProps): React.JSX.Element {
-  const [style, setStyle] = useState<React.CSSProperties>(PHASE_STYLES.visible);
-  const [transitioning, setTransitioning] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (phase === 'warp-out') {
-      setTransitioning(true);
-      setStyle(PHASE_STYLES['warp-out']);
-    } else if (phase === 'warp-in') {
-      // Jump instantly to "behind" position (no transition)
-      setTransitioning(false);
-      setStyle({
-        transform: 'scale(4)',
-        opacity: 0,
-        filter: 'blur(14px)',
-      });
-
-      // Then animate forward to visible on the next frame
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setTransitioning(true);
-          setStyle(PHASE_STYLES.visible);
-        });
-      });
-    } else {
-      setTransitioning(true);
-      setStyle(PHASE_STYLES.visible);
+  /**
+   * Derive style and transition from phase. For all phases except warp-in,
+   * this is the final style applied via React. For warp-in, the initial
+   * "behind" position is applied here (no transition), and the effect below
+   * handles the deferred animation to visible via direct DOM manipulation.
+   */
+  const { style, transition } = useMemo(() => {
+    if (phase === 'warp-in') {
+      return { style: PHASE_STYLES['warp-in'], transition: 'none' };
     }
+
+    return { style: PHASE_STYLES[phase], transition: TRANSITION_VALUE };
+  }, [phase]);
+
+  /**
+   * Handle the warp-in two-frame animation via direct DOM style manipulation.
+   * Effects are designed for synchronizing React with external systems (the DOM),
+   * so this is the idiomatic approach. No setState calls needed.
+   */
+  useEffect(() => {
+    if (phase !== 'warp-in') {
+      return;
+    }
+
+    const element = containerRef.current;
+    if (!element) {
+      return;
+    }
+
+    // After two frames the browser has painted the "behind" position.
+    // Now enable transition and animate to the visible position.
+    let cancelled = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (cancelled || !element) {
+          return;
+        }
+        element.style.transition = TRANSITION_VALUE;
+        element.style.transform = PHASE_STYLES.visible.transform as string;
+        element.style.opacity = String(PHASE_STYLES.visible.opacity);
+        element.style.filter = PHASE_STYLES.visible.filter as string;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [phase]);
 
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'absolute',
         height: '100vh',
@@ -76,64 +103,13 @@ export function Hero({
         alignItems: 'center',
         justifyContent: 'center',
         pointerEvents: 'none',
-        transition: transitioning ? 'transform 0.25s ease-out, opacity 0.25s ease-out, filter 0.25s ease-out' : 'none',
+        transition,
         ...style,
       }}
     >
       <div style={{ textAlign: 'center', pointerEvents: 'auto' }}>
-        <h1
-          style={{
-            fontFamily: '"Adam", sans-serif',
-            fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontWeight: 'normal',
-            letterSpacing: '-0.05em',
-            color: '#ffffff',
-            marginBottom: '0.5rem',
-          }}
-        >
-          MATIAS{' '}
-          <span style={{ color: '#facc15' }}>PIZZI</span>
-        </h1>
-
-        <p
-          style={{
-            fontSize: 'clamp(1rem, 2.5vw, 1.5rem)',
-            fontWeight: 300,
-            letterSpacing: '0.25em',
-            color: '#f3f4f6',
-            marginBottom: '3.5rem',
-          }}
-        >
-          FULL STACK DEVELOPER
-        </p>
-
-        <button
-          onClick={onStartWarp}
-          style={{
-            cursor: 'pointer',
-            borderRadius: '9999px',
-            border: '1px solid #facc15',
-            padding: '0.75rem 2rem',
-            fontSize: '0.875rem',
-            fontWeight: 500,
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            color: '#facc15',
-            background: 'transparent',
-            transition: 'all 0.3s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#facc15';
-            e.currentTarget.style.color = '#000000';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = '#facc15';
-          }}
-        >
-          Continue
-        </button>
-
+        <HeroTitle />
+        <WarpButton onClick={onStartWarp}>Continue</WarpButton>
       </div>
     </div>
   );

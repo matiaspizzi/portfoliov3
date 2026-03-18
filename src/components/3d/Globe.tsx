@@ -78,9 +78,7 @@ function GlowingNode({ position }: GlowingNodeProps) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={1}
-            array={new Float32Array([0, 0, 0])} // Centrado en el grupo
-            itemSize={3}
+            args={[new Float32Array([0, 0, 0]), 3]}
           />
         </bufferGeometry>
         <pointsMaterial
