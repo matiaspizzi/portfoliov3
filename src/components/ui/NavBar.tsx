@@ -41,7 +41,7 @@ export function NavBar({ onNavigate }: NavBarProps) {
         ease: [0.16, 1, 0.3, 1],
         delay: 0.1
       }}
-      className="flex sticky top-0 z-200 bg-black/20 backdrop-blur-2xl min-w-full h-16 items-center justify-center gap-6 border-b border-white/5 px-8"
+      className="hidden md:flex sticky top-0 z-200 bg-black/20 backdrop-blur-2xl min-w-full h-16 items-center justify-center gap-6 border-b border-white/5 px-8"
     >
       {navSections.map((section, index) => (
         <React.Fragment key={section}>

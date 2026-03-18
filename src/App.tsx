@@ -4,6 +4,7 @@ import { HeroSection } from './sections/HeroSection';
 import { WarpBackground } from './components/3d/WarpBackground';
 import { NebulaBackground } from './components/3d/NebulaBackground';
 import { NavBar } from './components/ui/NavBar';
+import { MobileNavBar } from './components/ui/MobileNavBar';
 // import { SectionObserver } from './components/SectionObserver';
 // import { AboutSection } from './sections/AboutSection';
 // import { ContactSection } from './sections/ContactSection';
@@ -70,6 +71,7 @@ export default function App(): React.JSX.Element {
       {phase === 'arrived' && (
         <div className="flex flex-col h-screen">
           <NavBar onNavigate={scrollToSection} />
+          <MobileNavBar onNavigate={scrollToSection} />
           <div ref={contentRef} className='relative z-10 flex-1 overflow-y-auto scroll-smooth h-screen'>
             {/* {SECTIONS_COMPONENTS.map(({ id, component }) => (
               <SectionObserver key={id} id={id}>
