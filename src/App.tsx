@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { HeroSection } from './sections/HeroSection';
-import { WarpBackground } from './components/3d/WarpBackground';
-import { NebulaBackground } from './components/3d/NebulaBackground';
-import { NavBar } from './components/ui/NavBar';
-import { MobileNavBar } from './components/ui/MobileNavBar';
+import { WarpBackground } from './components/background/WarpBackground';
+import { NebulaBackground } from './components/background/NebulaBackground';
+import { NavBar } from './components/navigation/NavBar';
+import { MobileNavBar } from './components/navigation/MobileNavBar';
 // import { SectionObserver } from './components/SectionObserver';
 // import { AboutSection } from './sections/AboutSection';
 // import { ContactSection } from './sections/ContactSection';

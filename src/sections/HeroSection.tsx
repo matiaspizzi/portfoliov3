@@ -1,4 +1,4 @@
-import { Hero } from "../components/ui/Hero";
+import { Hero } from "../components/hero/Hero";
 
 interface HeroProps {
   phase: string;
