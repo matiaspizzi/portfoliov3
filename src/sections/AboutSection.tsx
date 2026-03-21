@@ -1,9 +1,10 @@
+import under_construction from '../assets/gifs/under_construction.gif';
 
 export function AboutSection() {
-
   return (
-    <div className="relative min-h-[400px] flex items-center justify-center z-10  uppercase tracking-widest font-light text-2xl">
-      About
+    <div className="relative h-screen flex flex-col items-center justify-center z-10 gap-4">
+      <p className="uppercase tracking-widest font-light text-2xl">About</p>
+      <img src={under_construction} alt="Under construction" />
     </div>
   )
 }

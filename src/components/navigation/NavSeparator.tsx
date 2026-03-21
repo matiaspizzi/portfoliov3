@@ -11,7 +11,7 @@ interface NavSeparatorProps {
  * Brightens when its preceding section is active or past.
  */
 export function NavSeparator({ status }: NavSeparatorProps): React.JSX.Element {
-  const isHighlighted = status === 'active' || status === 'past';
+  const isHighlighted = status === 'past';
 
   return (
     <motion.div
