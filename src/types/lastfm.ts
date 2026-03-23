@@ -65,6 +65,7 @@ export type LastfmRecentTrack = {
 export type LastfmRecentTracksResponse = {
   recenttracks: {
     track: LastfmRecentTrack[]
+    '@attr'?: { totalPages: string; page: string; total: string }
   }
 }
 

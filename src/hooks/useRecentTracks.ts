@@ -49,10 +49,13 @@ function mapTracks(data: LastfmRecentTracksResponse): RecentTrack[] {
 export function useRecentTracks(username: string, limit = 10) {
   const [tracks, setTracks] = useState<RecentTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchTracks = useCallback(() => {
+  const fetchPage = useCallback((pageNum: number, replace: boolean) => {
     const apiKey = import.meta.env.VITE_LASTFM_API_KEY as string;
     if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
       setError('Last.fm API key not configured');
@@ -60,7 +63,7 @@ export function useRecentTracks(username: string, limit = 10) {
       return;
     }
 
-    const url = `${LASTFM_BASE_URL}?method=user.getRecentTracks&user=${username}&api_key=${apiKey}&format=json&limit=${limit}`;
+    const url = `${LASTFM_BASE_URL}?method=user.getRecentTracks&user=${username}&api_key=${apiKey}&format=json&limit=${limit}&page=${pageNum}`;
 
     fetch(url)
       .then((res) => {
@@ -69,12 +72,34 @@ export function useRecentTracks(username: string, limit = 10) {
       })
       .then((data) => {
         const mapped = mapTracks(data);
-        setCache(mapped);
-        setTracks(mapped);
+        const totalPages = parseInt(data.recenttracks['@attr']?.totalPages ?? '1', 10);
+        setHasMore(pageNum < totalPages);
+        if (replace) {
+          setCache(mapped);
+          setTracks(mapped);
+          setPage(1);
+        } else {
+          const filtered = mapped.filter((t) => !t.nowPlaying);
+          setTracks((prev) => [...prev, ...filtered]);
+          setPage(pageNum);
+        }
       })
       .catch((err: Error) => setError(err.message))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      });
   }, [username, limit]);
+
+  const fetchTracks = useCallback(() => {
+    fetchPage(1, true);
+  }, [fetchPage]);
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    fetchPage(page + 1, false);
+  }, [fetchPage, page, isLoadingMore, hasMore]);
 
   useEffect(() => {
     const cached = getCached();
@@ -91,7 +116,10 @@ export function useRecentTracks(username: string, limit = 10) {
     };
   }, [fetchTracks]);
 
-  const refresh = useCallback(() => fetchTracks(), [fetchTracks]);
+  const refresh = useCallback(() => {
+    setIsLoading(true);
+    fetchTracks();
+  }, [fetchTracks]);
 
-  return { tracks, isLoading, error, refresh };
+  return { tracks, isLoading, isLoadingMore, hasMore, error, refresh, loadMore };
 }

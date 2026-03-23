@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, Music } from 'lucide-react';
 import type { RecentTrack } from '../../types/lastfm';
@@ -17,8 +17,11 @@ function TrackImage({ src, alt, className }: { src: string; alt: string; classNa
 type RecentTracksProps = {
   tracks: RecentTrack[]
   isLoading: boolean
+  isLoadingMore?: boolean
+  hasMore?: boolean
   error: string | null
   onRefresh?: () => void
+  onLoadMore?: () => void
 }
 
 function formatTimeAgo(timestamp: number): string {
@@ -83,8 +86,17 @@ function SkeletonRow() {
   );
 }
 
-export function RecentTracks({ tracks, isLoading, error, onRefresh }: RecentTracksProps) {
+export function RecentTracks({ tracks, isLoading, isLoadingMore, error, onRefresh, onLoadMore }: RecentTracksProps) {
   const [spinning, setSpinning] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const handleListScroll = () => {
+    const list = listRef.current;
+    if (!list || !onLoadMore) return;
+    const { scrollTop, scrollHeight, clientHeight } = list;
+    if (scrollHeight - scrollTop - clientHeight < 60) onLoadMore();
+  };
+
   if (error) return null;
 
   const featured = tracks[0];
@@ -118,17 +130,24 @@ export function RecentTracks({ tracks, isLoading, error, onRefresh }: RecentTrac
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col">
-          {Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
+        <div className="flex flex-col md:flex-row gap-20 items-center">
+          <div className="shrink-0 mx-auto md:mx-0">
+            <div className="w-52 h-52 bg-white/5 animate-pulse" />
+            <div className="mt-4 mx-auto h-3 w-28 bg-white/5 animate-pulse rounded" />
+            <div className="mt-2 mx-auto h-3 w-20 bg-white/5 animate-pulse rounded" />
+          </div>
+          <div className="flex-1 flex flex-col divide-y divide-white/5 min-w-0 max-h-[300px]">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-20">
+        <div className="flex flex-col md:flex-row gap-20 items-center">
           {featured && (
             <div className="shrink-0 mx-auto md:mx-0">
               <NowPlayingCard track={featured} />
             </div>
           )}
-          <div data-lenis-prevent className="flex-1 flex flex-col divide-y divide-white/5 min-w-0 max-h-[300px] overflow-y-auto">
+          <div ref={listRef} data-lenis-prevent onScroll={handleListScroll} className="flex-1 flex flex-col divide-y divide-white/5 min-w-0 max-h-[300px] overflow-y-auto">
             {rest.map((track, i) => (
               <a
                 key={`${track.name}-${i}`}
@@ -151,10 +170,15 @@ export function RecentTracks({ tracks, isLoading, error, onRefresh }: RecentTrac
                   </p>
                 </div>
                 <span className="text-xs text-white/30 shrink-0">
-                  {track.nowPlaying ? '♫ Now' : track.date ? formatTimeAgo(track.date) : ''}
+                  {track.date ? formatTimeAgo(track.date) : ''}
                 </span>
               </a>
             ))}
+            {isLoadingMore && (
+              <div className="flex items-center justify-center px-3 py-3 border-t border-white/5">
+                <div className="w-4 h-4 border border-white/20 border-t-white/60 rounded-full animate-spin" />
+              </div>
+            )}
           </div>
         </div>
       )}

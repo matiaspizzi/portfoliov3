@@ -11,7 +11,7 @@ const LASTFM_USER = import.meta.env.VITE_LASTFM_USER as string || 'matiaspizzi';
 
 export function AboutSection() {
   const { albums, isLoading: albumsLoading, error: albumsError } = useTopAlbums(LASTFM_USER, 20);
-  const { tracks, isLoading: tracksLoading, error: tracksError, refresh } = useRecentTracks(LASTFM_USER, 10);
+  const { tracks, isLoading: tracksLoading, isLoadingMore, hasMore, error: tracksError, refresh, loadMore } = useRecentTracks(LASTFM_USER, 10);
 
   return (
     <div className="relative w-full min-h-screen">
@@ -26,7 +26,7 @@ export function AboutSection() {
       <div className="relative z-10 flex flex-col max-w-5xl mx-auto px-6">
         <IntroBlock />
         <div className="min-h-screen flex flex-col justify-center gap-12">
-          <RecentTracks tracks={tracks} isLoading={tracksLoading} error={tracksError} onRefresh={refresh} />
+          <RecentTracks tracks={tracks} isLoading={tracksLoading} isLoadingMore={isLoadingMore} hasMore={hasMore} error={tracksError} onRefresh={refresh} onLoadMore={loadMore} />
           <MusicMarquee albums={albums} isLoading={albumsLoading} error={albumsError} />
         </div>
         <div className="flex flex-col gap-24 md:gap-32 py-24 md:py-32">
