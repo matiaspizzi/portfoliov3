@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music, Camera } from 'lucide-react';
 
@@ -14,6 +15,7 @@ const SECTIONS = [
 ];
 
 export function IntroBlock({ activeSection, onToggle }: IntroBlockProps) {
+  const [hasClicked, setHasClicked] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -40,12 +42,17 @@ export function IntroBlock({ activeSection, onToggle }: IntroBlockProps) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            onClick={() => onToggle(id)}
-            className={`flex flex-col items-center gap-2 transition-colors cursor-pointer ${
+            onClick={() => { setHasClicked(true); onToggle(id); }}
+            className={`relative flex flex-col items-center gap-2 transition-colors cursor-pointer ${
               activeSection === id ? 'text-white' : 'text-white/50 hover:text-white/90'
             }`}
           >
-            <Icon className="w-6 h-6" />
+            <span className="relative">
+              <Icon className="w-6 h-6 relative z-10" />
+              {!hasClicked && (
+                <span className="absolute inset-0 rounded-full bg-white/20 animate-ping [animation-duration:2.5s]" />
+              )}
+            </span>
             <span className="text-xs uppercase tracking-widest">{label}</span>
           </motion.button>
         ))}

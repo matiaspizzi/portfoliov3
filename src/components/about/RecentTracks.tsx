@@ -154,7 +154,7 @@ export function RecentTracks({ tracks, isLoading, isLoadingMore, error, onRefres
                 href={track.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors group"
+                className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors group min-w-[350px]"
               >
                 <TrackImage
                   src={track.imageUrl}
@@ -162,10 +162,10 @@ export function RecentTracks({ tracks, isLoading, isLoadingMore, error, onRefres
                   className="w-10 h-10 object-cover shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white/90 group-hover:text-white truncate font-medium">
+                  <p className="text-sm text-white/90 group-hover:text-white truncate font-medium max-w-[250px] md:max-w-none">
                     {track.name}
                   </p>
-                  <p className="text-xs text-white/40 truncate">
+                  <p className="text-xs text-white/40 truncate max-w-[250px] md:max-w-none">
                     {track.artist}
                   </p>
                 </div>

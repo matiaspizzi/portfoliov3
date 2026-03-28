@@ -107,7 +107,10 @@ function BackgroundStars() {
 function ScorpioConstellation() {
   const groupRef = useRef<THREE.Group>(null);
   const antaresRef = useRef<THREE.Sprite>(null);
+  const lineMaterialRef = useRef<THREE.LineBasicMaterial>(null);
+  const spriteMaterialsRef = useRef<THREE.SpriteMaterial[]>([]);
   const texture = useMemo(() => createGlowTexture(64), []);
+  const fadeProgress = useRef(0);
 
   // Convert 2D constellation data to 3D positions on a plane at z=-2
   const starPositions = useMemo(() => {
@@ -129,14 +132,39 @@ function ScorpioConstellation() {
     return new Float32Array(pos);
   }, [starPositions]);
 
-  // Antares pulse
-  useFrame((state) => {
-    if (antaresRef.current) {
-      const t = state.clock.elapsedTime;
-      const pulse = 1 + 0.3 * Math.sin(t * 1.5);
-      const baseSize = 0.35;
-      antaresRef.current.scale.set(baseSize * pulse, baseSize * pulse, 1);
-      antaresRef.current.material.opacity = 0.6 + 0.2 * Math.sin(t * 2);
+  // Target opacities for each star
+  const targetOpacities = useMemo(() => {
+    return SCORPIO_STARS.map((star) => 0.4 + star.brightness * 0.5);
+  }, []);
+
+  // Fade-in + Antares pulse
+  useFrame((state, delta) => {
+    // Fade in over ~2.5 seconds (delay 0.5s)
+    if (fadeProgress.current < 1) {
+      fadeProgress.current = Math.min(1, fadeProgress.current + delta * 0.4);
+    }
+    const fade = fadeProgress.current;
+
+    // Fade lines
+    if (lineMaterialRef.current) {
+      lineMaterialRef.current.opacity = 0.12 * fade;
+    }
+
+    // Fade stars
+    for (let i = 0; i < spriteMaterialsRef.current.length; i++) {
+      const mat = spriteMaterialsRef.current[i];
+      if (!mat) continue;
+      const star = SCORPIO_STARS[i];
+      const isAntares = star.name === 'Antares';
+      if (isAntares && antaresRef.current) {
+        const t = state.clock.elapsedTime;
+        const pulse = 1 + 0.3 * Math.sin(t * 1.5);
+        const baseSize = 0.35;
+        antaresRef.current.scale.set(baseSize * pulse, baseSize * pulse, 1);
+        mat.opacity = (0.6 + 0.2 * Math.sin(t * 2)) * fade;
+      } else {
+        mat.opacity = targetOpacities[i] * fade;
+      }
     }
   });
 
@@ -151,9 +179,10 @@ function ScorpioConstellation() {
           />
         </bufferGeometry>
         <lineBasicMaterial
+          ref={lineMaterialRef}
           color="#ffffff"
           transparent
-          opacity={0.12}
+          opacity={0}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
@@ -173,10 +202,13 @@ function ScorpioConstellation() {
             scale={[size, size, 1]}
           >
             <spriteMaterial
+              ref={(el: THREE.SpriteMaterial | null) => {
+                if (el) spriteMaterialsRef.current[i] = el;
+              }}
               map={texture}
               color={isAntares ? '#ff6040' : '#e8d5b0'}
               transparent
-              opacity={0.4 + star.brightness * 0.5}
+              opacity={0}
               blending={THREE.AdditiveBlending}
               depthWrite={false}
             />
@@ -203,7 +235,7 @@ export function ScorpioSky() {
       <group ref={starsRef}>
         <BackgroundStars />
       </group>
-      <group position={[0, 3.3, 0]}>
+      <group position={[0, 0.5, 0]}>
         <ScorpioConstellation />
       </group>
     </>

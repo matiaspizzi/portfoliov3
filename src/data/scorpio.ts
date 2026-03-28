@@ -7,7 +7,7 @@ type Star = {
   brightness: number
 }
 
-const SCALE = -0.010;
+const SCALE = -0.020;
 
 export const SCORPIO_STARS: Star[] = [
   { x: -48 * SCALE, y: -43 * SCALE, name: 'Star 1', brightness: 0.6 },     // 0

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
 import { ScorpioSky } from '../components/3d/ScorpioSky';
 import { IntroBlock } from '../components/about/IntroBlock';
 import { MusicMarquee } from '../components/about/MusicMarquee';
@@ -49,7 +50,10 @@ export function AboutSection() {
               exit="exit"
               className="overflow-hidden"
             >
-              <div className="flex flex-col gap-12 py-12">
+              <div className="relative flex flex-col gap-12 my-12">
+                <button onClick={() => setActiveSection(null)} className="absolute top-0 right-0 text-white/60 hover:text-white transition-colors cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
                 <RecentTracks tracks={tracks} isLoading={tracksLoading} isLoadingMore={isLoadingMore} hasMore={hasMore} error={tracksError} onRefresh={refresh} onLoadMore={loadMore} />
                 <MusicMarquee albums={albums} isLoading={albumsLoading} error={albumsError} />
               </div>
@@ -65,7 +69,10 @@ export function AboutSection() {
               exit="exit"
               className="overflow-hidden"
             >
-              <div className="py-12">
+              <div className="relative py-12">
+                <button onClick={() => setActiveSection(null)} className="absolute top-0 right-0 text-white/60 hover:text-white transition-colors cursor-pointer">
+                  <X className="w-5 h-5" />
+                </button>
                 <PhotoGrid />
               </div>
             </motion.div>

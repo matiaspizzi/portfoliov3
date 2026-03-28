@@ -12,7 +12,7 @@ export const SectionObserver = ({ id, children }: SectionObserverProps) => {
   const sectionRef = useRef<HTMLElement>(null);
 
   const isInView = useInView(sectionRef, {
-    amount: 0.3,
+    amount: 0.1,
     margin: "-10% 0px -45% 0px"
   });
 

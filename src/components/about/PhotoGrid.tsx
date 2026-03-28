@@ -1,47 +1,80 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 
-// Placeholder photos — replace with real images from src/assets/photos/
-const PHOTOS = [
-  { src: 'https://placehold.co/400x500/1a1a2e/ffffff?text=Kayak', alt: 'Kayak' },
-  { src: 'https://placehold.co/400x300/1a1a2e/ffffff?text=Asado', alt: 'Asado' },
-  { src: 'https://placehold.co/400x450/1a1a2e/ffffff?text=Travel+1', alt: 'Travel' },
-  { src: 'https://placehold.co/400x350/1a1a2e/ffffff?text=Travel+2', alt: 'Travel' },
-  { src: 'https://placehold.co/400x400/1a1a2e/ffffff?text=Friends', alt: 'Friends' },
-  { src: 'https://placehold.co/400x500/1a1a2e/ffffff?text=Adventure', alt: 'Adventure' },
-] as const;
+const photoModules = import.meta.glob<{ default: string }>(
+  '../../assets/photos/*.{png,PNG,webp,jpg,jpeg}',
+  { eager: false }
+);
+
+const allPhotoPaths = Object.keys(photoModules).sort((a, b) => {
+  const numA = parseInt(a.match(/\/(\d+)/)?.[1] ?? '999999', 10);
+  const numB = parseInt(b.match(/\/(\d+)/)?.[1] ?? '999999', 10);
+  if (numA !== numB) return numA - numB;
+  return a.localeCompare(b);
+});
+
+const COLS = 3;
+
+function distributeToColumns(photos: string[], cols: number): string[][] {
+  const columns: string[][] = Array.from({ length: cols }, () => []);
+  photos.forEach((src, i) => {
+    columns[i % cols].push(src);
+  });
+  return columns;
+}
 
 export function PhotoGrid() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col gap-6"
-    >
-      <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-center" style={{ fontFamily: 'Adam, sans-serif' }}>
-        Life Outside Code
-      </h3>
+  const [photos, setPhotos] = useState<string[]>([]);
 
-      <div className="columns-2 md:columns-3 gap-4">
-        {PHOTOS.map((photo, index) => (
-          <motion.div
-            key={photo.alt + index}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.08 }}
-            className="break-inside-avoid mb-4"
-          >
-            <img
-              src={photo.src}
-              alt={photo.alt}
-              className="w-full rounded-lg hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-          </motion.div>
-        ))}
+  const columns = useMemo(() => distributeToColumns(photos, COLS), [photos]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      allPhotoPaths.map(async (path) => {
+        const mod = await photoModules[path]();
+        return mod.default;
+      })
+    ).then((urls) => {
+      if (!cancelled) setPhotos(urls);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (photos.length === 0) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
-    </motion.div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div
+        data-lenis-prevent
+        className="h-[70vh] overflow-y-auto scrollbar-thin pr-2"
+      >
+        <div className="flex gap-3">
+          {columns.map((col, colIndex) => (
+            <div key={colIndex} className="flex-1 flex flex-col gap-3">
+              {col.map((src, i) => (
+                <div key={i} className="overflow-hidden rounded-lg">
+                  <img
+                    src={src}
+                    alt={`Photo ${colIndex + i * COLS + 1}`}
+                    className="w-full hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-white/20 text-xs py-4">
+          {photos.length} photos
+        </p>
+      </div>
+    </div>
   );
 }

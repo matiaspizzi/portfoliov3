@@ -1,10 +1,25 @@
-import under_construction from '../assets/gifs/under_construction.gif';
+import { motion } from 'framer-motion';
+import { Timeline } from '../components/experience/Timeline';
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function ExperienceSection() {
   return (
-    <div className="relative h-screen flex flex-col items-center justify-center z-10 gap-4">
-      <p className="uppercase tracking-widest font-light text-2xl">Experience</p>
-      <img src={under_construction} alt="Under construction" />
+    <div className="relative w-full min-h-screen">
+      <div className="relative z-10 flex flex-col max-w-4xl mx-auto px-6 py-24">
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="text-4xl md:text-5xl font-bold tracking-tight text-center mb-16"
+          style={{ fontFamily: 'Adam, sans-serif' }}
+        >
+          Experience
+        </motion.h2>
+
+        <Timeline />
+      </div>
     </div>
-  )
+  );
 }

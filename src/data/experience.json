@@ -1,0 +1,53 @@
+{
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "company": "Sirius Software",
+      "companyDetail": "Mandiant - Vendor for Google",
+      "location": "Buenos Aires, AR",
+      "period": "Sept 2024 - Present",
+      "bullets": [
+        "Member of the UI team at Mandiant Security Validation. Resolved 40+ critical bugs and implemented user requirements in a React.js application. Fixed bugs, when necessary, in the backend (Ruby on Rails).",
+        "Maintained integrations within a FaaS microservices architecture (Mandiant SecOps Integrations Team) for connectors such as Trellix, Elasticsearch, Google Chronicle, CrowdStrike, Carbon Black, Palo Alto and more. +4 New Integrations, +14 Refactored/Changed, +18 Fixes.",
+        "Updated FastAPI from v0.78 to v0.123. Updated Pydantic from v1 to v2 and migrated 100+ models. Updated HTTPX from v0.23 to v0.28 and handled the transport layer migration.",
+        "Implemented an SSL Context Manager for CA bundles and improved Proxies support."
+      ],
+      "tech": ["React", "TypeScript", "Ruby on Rails", "Python", "FastAPI", "Pydantic", "HTTPX", "Podman"]
+    },
+    {
+      "title": "Test Engineer",
+      "company": "Sirius Software",
+      "companyDetail": "Mandiant - Vendor for Google",
+      "location": "Buenos Aires, AR",
+      "period": "May 2024 - Sept 2024",
+      "bullets": [
+        "Validated environment integrity for Mandiant Security Validation through Regression and Smoke testing.",
+        "Deployed virtual testing environments with Jenkins and VMWare vSphere.",
+        "Automated UI testing with TestCafe and API testing with Pytest."
+      ],
+      "tech": ["Jenkins", "VMWare vSphere", "TestCafe", "Pytest", "Python"]
+    },
+    {
+      "title": "Front End Developer",
+      "company": "Sirius Software",
+      "location": "Buenos Aires, AR",
+      "period": "Sept 2023 - May 2024",
+      "bullets": [
+        "Developed a management dashboard that centralizes Jira and Linear tickets in a single interface, allowing time and event tracking of multiple projects to improve the accuracy of estimates in future sprints."
+      ],
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Redux", "TanStack Query"]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "AWS: Certified Solutions Architect - Associate",
+      "credlyUrl": "https://www.credly.com/badges/2d79540e-098a-4f23-8831-c9e1bd5f069f",
+      "badgeImage": "/src/assets/certifications-logos/aws-solutions-architect.png"
+    },
+    {
+      "name": "Google: Cybersecurity Professional Certificate V2",
+      "credlyUrl": "https://www.credly.com/badges/e5ff2bd7-8f7e-4b51-b50a-8c77cf9bfb2e",
+      "badgeImage": "/src/assets/certifications-logos/google-cybersecurity.png"
+    }
+  ]
+}
