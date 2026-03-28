@@ -23,6 +23,12 @@ export type CertificationEntry = {
   badgeImage?: string
 }
 
-export const experiences: ExperienceEntry[] = data.experience ?? [];
-export const education: EducationEntry[] = data.education ?? [];
-export const certifications: CertificationEntry[] = (data.certifications ?? []) as CertificationEntry[];
+const json = data as {
+  experience?: ExperienceEntry[]
+  education?: EducationEntry[]
+  certifications?: CertificationEntry[]
+};
+
+export const experiences: ExperienceEntry[] = json.experience ?? [];
+export const education: EducationEntry[] = json.education ?? [];
+export const certifications: CertificationEntry[] = json.certifications ?? [];
